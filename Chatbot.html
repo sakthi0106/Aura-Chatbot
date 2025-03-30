@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pneumonia Chatbot | Aura</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+  <style>
+    /* Import Google Font - Poppins */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+:root {
+  /* Dark mode colors */
+  --text-color: #E3E3E3;
+  --subheading-color: #828282;
+  --placeholder-color: #A6A6A6;
+  --primary-color: #242424;
+  --secondary-color: #383838;
+  --secondary-hover-color: #444;
+}
+.light_mode {
+  /* Light mode colors */
+  --text-color: #222;
+  --subheading-color: #A0A0A0;
+  --placeholder-color: #6C6C6C;
+  --primary-color: #FFF;
+  --secondary-color: #E9EEF6;
+  --secondary-hover-color: #DBE1EA;
+}
+body {
+  background: var(--primary-color);
+}
+.header, .chat-list .message, .typing-form {
+  margin: 0 auto;
+  max-width: 980px;
+}
+.header {
+  margin-top: 6vh;
+  padding: 1rem;
+  overflow-x: hidden;
+}
+body.hide-header .header {
+  margin: 0;
+  display: none;
+}
+.header :where(.title, .subtitle) {
+  color: var(--text-color);
+  font-weight: 500;
+  line-height: 4rem;
+}
+.header .title {
+  width: fit-content;
+  font-size: 3rem;
+  background-clip: text;
+  background: linear-gradient(to right, #4285f4, #d96570);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.header .subtitle {
+  font-size: 2.6rem;
+  color: var(--subheading-color);
+}
+.suggestion-list {
+  width: 100%;
+  list-style: none;
+  display: flex;
+  gap: 1.25rem;
+  margin-top: 9.5vh;
+  overflow: hidden;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+.suggestion-list .suggestion {
+  cursor: pointer;
+  padding: 1.25rem;
+  width: 222px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  border-radius: 0.75rem;
+  justify-content: space-between;
+  background: var(--secondary-color);
+  transition: 0.2s ease;
+}
+.suggestion-list .suggestion:hover {
+  background: var(--secondary-hover-color);
+}
+.suggestion-list .suggestion :where(.text, .icon) {
+  font-weight: 400;
+  color: var(--text-color);
+}
+.suggestion-list .suggestion .icon {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  font-size: 1.3rem;
+  margin-top: 2.5rem;
+  align-self: flex-end;
+  align-items: center;
+  border-radius: 50%;
+  justify-content: center;
+  color: var(--text-color);
+  background: var(--primary-color);
+}
+.chat-list {
+  padding: 2rem 1rem 12rem;
+  max-height: 100vh;
+  overflow-y: auto;
+  scrollbar-color: #999 transparent;
+}
+.chat-list .message.incoming {
+  margin-top: 1.5rem;
+}
+.chat-list .message .message-content {
+  display: flex;
+  gap: 1.5rem;
+  width: 100%;
+  align-items: center;
+}
+.chat-list .message .text {
+  color: var(--text-color);
+  white-space: pre-wrap;
+}
+.chat-list .message.error .text {
+  color: #e55865;
+}
+.chat-list .message.loading .text {
+  display: none;
+}
+.chat-list .message .avatar {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 50%;
+  align-self: flex-start;
+}
+.chat-list .message.loading .avatar {
+  animation: rotate 3s linear infinite;
+}
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.chat-list .message .icon {
+  color: var(--text-color);
+  cursor: pointer;
+  height: 35px;
+  width: 35px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  font-size: 1.25rem;
+  margin-left: 3.5rem;
+  visibility: hidden;
+}
+.chat-list .message .icon.hide {
+  visibility: hidden;
+}
+.chat-list .message:not(.loading, .error):hover .icon:not(.hide){
+  visibility: visible;
+}
+.chat-list .message .icon:hover {
+  background: var(--secondary-hover-color);
+}
+.chat-list .message .loading-indicator {
+  display: none;
+  gap: 0.8rem;
+  width: 100%;
+  flex-direction: column;
+}
+.chat-list .message.loading .loading-indicator {
+  display: flex;
+}
+.chat-list .message .loading-indicator .loading-bar {
+  height: 11px;
+  width: 100%;
+  border-radius: 0.135rem;
+  background-position: -800px 0;
+  background: linear-gradient(to right, #4285f4, var(--primary-color), #4285f4);
+  animation: loading 3s linear infinite;
+}
+.chat-list .message .loading-indicator .loading-bar:last-child {
+  width: 70%;
+}
+@keyframes loading {
+  0% {
+    background-position: -800px 0;
+  }
+  100% {
+    background-position: 800px 0;
+  }
+}
+.typing-area {
+  position: fixed;
+  width: 100%;
+  left: 0;
+  bottom: 0;
+  padding: 1rem;
+  background: var(--primary-color);
+}
+.typing-area :where(.typing-form, .action-buttons) {
+  display: flex;
+  gap: 0.75rem;
+}
+.typing-form .input-wrapper {
+  width: 100%;
+  height: 56px;
+  display: flex;
+  position: relative;
+}
+.typing-form .typing-input {
+  height: 100%;
+  width: 100%;
+  border: none;
+  outline: none;
+  resize: none;
+  font-size: 1rem;
+  color: var(--text-color);
+  padding: 1.1rem 4rem 1.1rem 1.5rem;
+  border-radius: 100px;
+  background: var(--secondary-color);
+}
+.typing-form .typing-input:focus {
+  background: var(--secondary-hover-color);
+}
+.typing-form .typing-input::placeholder {
+  color: var(--placeholder-color);
+}
+.typing-area .icon {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  font-size: 1.4rem;
+  color: var(--text-color);
+  align-items: center;
+  justify-content: center;
+  background: var(--secondary-color);
+  transition: 0.2s ease;
+}
+.typing-area .icon:hover {
+  background: var(--secondary-hover-color);
+}
+.typing-form .typing-input:valid ~ #send-message-button {
+  transform: scale(1);
+}
+.typing-area .disclaimer-text {
+  text-align: center;
+  font-size: 0.85rem;
+  margin-top: 1rem;
+  color: var(--placeholder-color);
+}
+/* Responsive media query code for small screen */
+@media (max-width: 768px) {
+  .header :is(.title, .subtitle) {
+    font-size: 2rem;
+    line-height: 2.6rem;
+  }
+  .header .subtitle {
+    font-size: 1.7rem;
+  }
+  .typing-area :where(.typing-form, .action-buttons) {
+    gap: 0.4rem;
+  }
+  .typing-form .input-wrapper {
+    height: 50px;
+  }
+  .typing-form .typing-input {
+    padding: 1.1rem 3.5rem 1.1rem 1.2rem;
+  }
+  .typing-area .icon {
+    height: 50px;
+    width: 50px;
+  }
+  .typing-area .disclaimer-text {
+    font-size: 0.75rem;
+    margin-top: 0.5rem;
+  }
+}
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1 class="title">Hello, I'm Aura</h1>
+    <p class="subtitle">Your pneumonia assistant. How can I help you today?</p>
+    <ul class="suggestion-list">
+      <li class="suggestion"><h3 class="text">What is pneumonia?</h3></li>
+      <li class="suggestion"><h4 class="text">What are the symptoms of pneumonia?</h4></li>
+      <li class="suggestion"><h4 class="text">What are the stages of pneumonia?</h4></li>
+      <li class="suggestion"><h4 class="text">How can pneumonia be treated?</h4></li>
+      <li class="suggestion"><h4 class="text">Can pneumonia be prevented?</h4></li>
+      <li class="suggestion"><h4 class="text">Is pneumonia contagious?</h4></li>
+    </ul>
+  </header>
+
+  <div class="chat-list"></div>
+
+  <div class="typing-area">
+    <form action="#" class="typing-form">
+      <div class="input-wrapper">
+        <input type="text" placeholder="Ask about pneumonia..." class="typing-input" required />
+        <button id="send-message-button" class="icon material-symbols-rounded">send</button>
+        <button id="delete-message-button" class="icon material-symbols-rounded">delete</button>
+        <!-- Theme Toggle Button -->
+        <button id="theme-toggle-button" class="icon material-symbols-rounded">brightness_4</button>
+      </div>
+    </form>
+    <p class="disclaimer-text">Aura provides information about pneumonia but does not replace medical advice.</p>
+  </div>
+
+  <script>
+    const API_KEY = "AIzaSyBISv8ZI4hcTKH5-eHfwEfsMxytyKYBtrg";
+    const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + API_KEY;
+
+    const typingForm = document.querySelector(".typing-form");
+    const chatContainer = document.querySelector(".chat-list");
+    const suggestions = document.querySelectorAll(".suggestion");
+    const typingInput = document.querySelector(".typing-input");
+    const deleteButton = document.getElementById("delete-message-button");
+    const themeToggleButton = document.getElementById("theme-toggle-button");
+    let userMessage = null;
+
+    const greetings = ["hi", "hello", "aura", "hi aura", "hello aura"];
+
+    const pneumoniaKeywords = ["pneumonia", "congestion", "lobar pneumonia", "bronchopneumonia", "alveoli", "pleural effusion", "hospital-acquired pneumonia", "community-acquired pneumonia"];
+
+    const correctSpelling = (text) => {
+      const corrections = {
+        "pnemonia": "pneumonia",
+        "pnemonia stages": "pneumonia stages",
+        "pnemonia symptoms": "pneumonia symptoms"
+      };
+      return corrections[text] || text;
+    };
+
+    const handleOutgoingChat = async () => {
+      userMessage = typingInput.value.trim().toLowerCase();
+      userMessage = correctSpelling(userMessage);
+      if (!userMessage) return;
+      
+      const outgoingMessageDiv = document.createElement("div");
+      outgoingMessageDiv.classList.add("message", "outgoing");
+      outgoingMessageDiv.innerHTML = `<div class="message-content" style="margin: 10px 0;"><p class="text">${userMessage}</p></div>`;
+      chatContainer.appendChild(outgoingMessageDiv);
+      
+      typingForm.reset();
+      setTimeout(() => fetchAPIResponse(userMessage), 500);
+    };
+
+    const fetchAPIResponse = async (message) => {
+      if (greetings.includes(message)) {
+        appendIncomingMessage("Hi there! I'm Aura. How can I assist you today?");
+        return;
+      }
+      
+      if (!pneumoniaKeywords.some(keyword => message.includes(keyword))) {
+        appendIncomingMessage("I can only answer pneumonia-related questions.");
+        return;
+      }
+      
+      appendIncomingMessage("Typing...");
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: message }] }]
+          })
+        });
+        const data = await response.json();
+        let responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || "I am here to help with pneumonia-related questions.";
+        
+        // Remove ** from the response text
+        responseText = responseText.replace(/\*\*/g, "");
+
+        updateLastMessage(responseText);
+      } catch (error) {
+        updateLastMessage(`Error: ${error.message}. Please try again.`);
+      }
+    };
+
+    const appendIncomingMessage = (text) => {
+      const incomingMessageDiv = document.createElement("div");
+      incomingMessageDiv.classList.add("message", "incoming");
+      incomingMessageDiv.innerHTML = `<div class="message-content" style="margin: 10px 0;"><p class="text">${text}</p></div>`;
+      chatContainer.appendChild(incomingMessageDiv);
+    };
+
+    const updateLastMessage = (text) => {
+      const lastMessage = chatContainer.querySelector(".message.incoming:last-child .text");
+      if (lastMessage) lastMessage.innerText = text;
+    };
+
+    deleteButton.addEventListener("click", () => {
+      typingInput.value = "";
+      chatContainer.innerHTML = "";
+    });
+
+    suggestions.forEach(suggestion => {
+      suggestion.addEventListener("click", () => {
+        typingInput.value = suggestion.querySelector(".text").innerText;
+        handleOutgoingChat();
+      });
+    });
+
+    typingForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      handleOutgoingChat();
+    });
+
+    // Theme toggle functionality
+    themeToggleButton.addEventListener("click", () => {
+      document.body.classList.toggle("light_mode");
+    });
+  </script>
+</body>
+</html>
